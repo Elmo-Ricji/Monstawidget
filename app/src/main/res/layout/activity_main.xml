@@ -20,8 +20,8 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp" />
 
-    <ListView
-        android:id="@+id/listView"
+    <RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="537dp"
         android:layout_margin="20dp"

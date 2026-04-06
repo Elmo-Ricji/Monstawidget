@@ -3,17 +3,25 @@ package com.example.notesappwidget.ui
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.ListView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.notesappwidget.ui.adapter.MyAdapter
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.notesappwidget.R
+import com.example.notesappwidget.data.AppDatabase
+import com.example.notesappwidget.repository.NoteRepository
+import com.example.notesappwidget.ui.adapter.NoteAdapter
+import com.example.notesappwidget.viewmodel.HomeViewModel
+import com.example.notesappwidget.viewmodel.HomeViewModelFactory
 
 class MainActivity : AppCompatActivity() {
-    private var adapter: com.example.notesappwidget.ui.adapter.MyAdapter? = null
-    private lateinit var items: ArrayList<String>
+
+    private lateinit var viewModel: HomeViewModel
+    private lateinit var noteAdapter: NoteAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,48 +33,41 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val listView = findViewById<ListView>(R.id.listView)
-        val addNoteButton = findViewById<Button>(R.id.add_button)
+        // setup viewmodel
+        val dao = AppDatabase.getInstance(this).noteDao()
+        val repository = NoteRepository(dao)
+        val factory = HomeViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
 
-
-        // Initialize the list of items
-        items = ArrayList()
-
-
-        // Add a temporary item
-        items.add("Temp Add Element")
-
-
-        // Create the adapter and set it to the ListView
-        adapter = MyAdapter(this, items)
-        listView.adapter = adapter
-
-
-        // Set click listener for the add note button
-        addNoteButton.setOnClickListener {
-            val intent = Intent(
-                this@MainActivity,
-                EditorNoteActivity::class.java
-            )
-            startActivityForResult(intent, REQUEST_CODE_ADD_NOTE)
-        }
-    }
-
-
-    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_CODE_ADD_NOTE && resultCode == RESULT_OK) {
-            val newNote = data?.getStringExtra("NEW_NOTE")
-            if (newNote != null) {
-                items.add(newNote)
-                adapter!!.notifyDataSetChanged()
+        // setup recyclerview
+        noteAdapter = NoteAdapter(
+            onNoteClick = { note ->
+                val intent = Intent(this, DetailActivity::class.java)
+                intent.putExtra("NOTE_ID", note.id)
+                startActivity(intent)
+            },
+            onNoteLongClick = { note ->
+                AlertDialog.Builder(this)
+                    .setTitle("Delete note?")
+                    .setMessage("This cannot be undone")
+                    .setPositiveButton("Delete") { _, _ -> viewModel.deleteNote(note) }
+                    .setNegativeButton("Cancel", null)
+                    .show()
             }
-        }
-    }
+        )
 
-    companion object {
-        const val REQUEST_CODE_ADD_NOTE: Int = 1
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        recyclerView.adapter = noteAdapter
+
+        // observe notes from room
+        viewModel.allNotes.observe(this) { notes ->
+            noteAdapter.submitList(notes)
+        }
+
+        // add note button
+        findViewById<Button>(R.id.add_button).setOnClickListener {
+            startActivity(Intent(this, EditorNoteActivity::class.java))
+        }
     }
 }

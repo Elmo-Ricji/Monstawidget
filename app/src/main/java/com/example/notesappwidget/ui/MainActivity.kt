@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         val dao = AppDatabase.getInstance(this).noteDao()
         val repository = NoteRepository(dao)
         val factory = HomeViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
         // setup recyclerview
         noteAdapter = NoteAdapter(

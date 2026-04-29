@@ -16,14 +16,15 @@
             android:id="@+id/detailThoughtCloud"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/thought_cloud_bg"
             android:padding="12dp"
             android:textSize="14sp"
             android:layout_marginBottom="4dp"/>
 
         <ImageView
             android:id="@+id/detailCreatureImage"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
             android:contentDescription="creature"
             android:scaleType="centerInside"
             android:layout_marginBottom="16dp"/>
@@ -55,7 +56,16 @@
             android:id="@+id/editButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Edit Note"/>
+            android:text="Edit Note"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/doneButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="✅ Done! Free my Monsta"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"/>
 
     </LinearLayout>
 </ScrollView>

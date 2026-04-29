@@ -33,18 +33,15 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // setup viewmodel
         val dao = AppDatabase.getInstance(this).noteDao()
         val repository = NoteRepository(dao)
-        val factory = HomeViewModelFactory(repository)
-        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+        viewModel = ViewModelProvider(this, HomeViewModelFactory(repository))[HomeViewModel::class.java]
 
-        // setup recyclerview
         noteAdapter = NoteAdapter(
             onNoteClick = { note ->
-                val intent = Intent(this, DetailActivity::class.java)
-                intent.putExtra("NOTE_ID", note.id)
-                startActivity(intent)
+                startActivity(Intent(this, DetailActivity::class.java).apply {
+                    putExtra("NOTE_ID", note.id)
+                })
             },
             onNoteLongClick = { note ->
                 AlertDialog.Builder(this)
@@ -60,12 +57,10 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.adapter = noteAdapter
 
-        // observe notes from room
         viewModel.allNotes.observe(this) { notes ->
             noteAdapter.submitList(notes)
         }
 
-        // add note button
         findViewById<Button>(R.id.add_button).setOnClickListener {
             startActivity(Intent(this, EditorNoteActivity::class.java))
         }

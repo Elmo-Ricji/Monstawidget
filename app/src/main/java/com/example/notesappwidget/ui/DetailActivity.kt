@@ -1,14 +1,14 @@
 package com.example.notesappwidget.ui
 
-import com.example.notesappwidget.viewmodel.NoteEditorViewModel
-import com.example.notesappwidget.viewmodel.NoteEditorViewModelFactory
-import com.example.notesappwidget.util.startJumping
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,10 +16,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.notesappwidget.R
 import com.example.notesappwidget.data.AppDatabase
 import com.example.notesappwidget.repository.NoteRepository
+import com.example.notesappwidget.util.getFullDrawable
+import com.example.notesappwidget.viewmodel.NoteEditorViewModel
+import com.example.notesappwidget.viewmodel.NoteEditorViewModelFactory
+import com.example.notesappwidget.widget.CreatureWidgetProvider
 
-
-class DetailActivity : AppCompatActivity()
-{
+class DetailActivity : AppCompatActivity() {
 
     private lateinit var viewModel: NoteEditorViewModel
 
@@ -38,35 +40,25 @@ class DetailActivity : AppCompatActivity()
         val factory = NoteEditorViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[NoteEditorViewModel::class.java]
 
-        val titleView = findViewById<TextView>(R.id.detailTitle)
-        val bodyView = findViewById<TextView>(R.id.detailBody)
+        val titleView   = findViewById<TextView>(R.id.detailTitle)
+        val bodyView    = findViewById<TextView>(R.id.detailBody)
         val thoughtCloud = findViewById<TextView>(R.id.detailThoughtCloud)
         val creatureView = findViewById<ImageView>(R.id.detailCreatureImage)
-        val shareButton = findViewById<Button>(R.id.shareButton)
-        val editButton = findViewById<Button>(R.id.editButton)
+        val shareButton  = findViewById<Button>(R.id.shareButton)
+        val editButton   = findViewById<Button>(R.id.editButton)
+        val doneButton   = findViewById<Button>(R.id.doneButton)
 
         val noteId = intent.getIntExtra("NOTE_ID", -1)
-        if (noteId != -1) {
-            viewModel.loadNote(noteId)
-        }
+        if (noteId != -1) viewModel.loadNote(noteId)
 
         viewModel.currentNote.observe(this) { note ->
             note?.let {
-                titleView.text = it.title ?: "Untitled"
-                bodyView.text = it.body ?: ""
+                titleView.text   = it.title ?: "Untitled"
+                bodyView.text    = it.body ?: ""
                 thoughtCloud.text = it.reminderPhrase ?: ""
+                // static — no jumping in app
+                creatureView.setImageResource(getFullDrawable(it.creatureId))
 
-                val creatureRes = when (it.creatureId) {
-                    0 -> R.drawable.creature_0
-                    1 -> R.drawable.creature_1
-                    2 -> R.drawable.creature_2
-                    3 -> R.drawable.creature_3
-                    else -> R.drawable.creature_0
-                }
-                creatureView.setImageResource(creatureRes)
-                creatureView.startJumping()
-
-                // share button
                 shareButton.setOnClickListener { _ ->
                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
@@ -76,13 +68,38 @@ class DetailActivity : AppCompatActivity()
                     startActivity(Intent.createChooser(shareIntent, "Share note via"))
                 }
 
-                // edit button
                 editButton.setOnClickListener { _ ->
-                    val intent = Intent(this, EditorNoteActivity::class.java)
-                    intent.putExtra("NOTE_ID", it.id)
-                    startActivity(intent)
+                    startActivity(Intent(this, EditorNoteActivity::class.java).apply {
+                        putExtra("NOTE_ID", it.id)
+                    })
+                }
+
+                // Done button — deletes note, frees Monsta, refreshes widget
+                doneButton.setOnClickListener { _ ->
+                    AlertDialog.Builder(this)
+                        .setTitle("Mark as done?")
+                        .setMessage("This will delete the note and free your Monsta!")
+                        .setPositiveButton("Done! 🎉") { _, _ ->
+                            viewModel.deleteCurrentNote()
+                            refreshWidget()
+                            finish()
+                        }
+                        .setNegativeButton("Not yet", null)
+                        .show()
                 }
             }
         }
+    }
+
+    private fun refreshWidget() {
+        val manager = AppWidgetManager.getInstance(this)
+        val ids = manager.getAppWidgetIds(
+            ComponentName(this, CreatureWidgetProvider::class.java)
+        )
+        val intent = Intent(this, CreatureWidgetProvider::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        }
+        sendBroadcast(intent)
     }
 }

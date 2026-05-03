@@ -47,12 +47,14 @@ class CreaturePickerAdapter(
         holder.inUseLabel.visibility = if (isUsed) View.VISIBLE else View.GONE
 
         holder.itemView.setOnClickListener {
-            if (isUsed) return@setOnClickListener  // can't pick a used monsta
+            val current = holder.adapterPosition
+            if (current == RecyclerView.NO_ID.toInt()) return@setOnClickListener
+            if (current in usedIds) return@setOnClickListener
             val prev = selectedPosition
-            selectedPosition = position
+            selectedPosition = current
             notifyItemChanged(prev)
-            notifyItemChanged(position)
-            onCreatureSelected(position)
+            notifyItemChanged(current)
+            onCreatureSelected(current)
         }
     }
 

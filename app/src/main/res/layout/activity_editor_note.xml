@@ -32,15 +32,6 @@
             android:gravity="top"
             android:contentDescription="Note body" />
 
-        <EditText
-            android:id="@+id/editReminderPhrase"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Reminder phrase (what your Monsta will say)"
-            android:inputType="textCapSentences"
-            android:contentDescription="Reminder phrase" />
-
         <Button
             android:id="@+id/buttonSetTime"
             android:layout_width="wrap_content"

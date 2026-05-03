@@ -1,15 +1,22 @@
 package com.example.notesappwidget.ui
 
+import android.app.AlarmManager
 import android.app.TimePickerDialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -35,10 +42,14 @@ class EditorNoteActivity : AppCompatActivity() {
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var creaturePickerAdapter: CreaturePickerAdapter
 
+    private lateinit var titleEdit: EditText
+    private lateinit var bodyEdit: EditText
+    private lateinit var reminderEdit: EditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_add_note)
+        setContentView(R.layout.activity_editor_note)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -53,12 +64,12 @@ class EditorNoteActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, NoteEditorViewModelFactory(repository))[NoteEditorViewModel::class.java]
         homeViewModel = ViewModelProvider(this, HomeViewModelFactory(repository))[HomeViewModel::class.java]
 
-        val titleEdit    = findViewById<EditText>(R.id.editTitle)
-        val bodyEdit     = findViewById<EditText>(R.id.editBody)
-        val reminderEdit = findViewById<EditText>(R.id.editReminderPhrase)
-        val saveButton   = findViewById<Button>(R.id.buttonSave)
-        val timeButton   = findViewById<Button>(R.id.buttonSetTime)
-        val timeLabel    = findViewById<TextView>(R.id.textReminderTime)
+        titleEdit    = findViewById(R.id.editTitle)
+        bodyEdit     = findViewById(R.id.editBody)
+        reminderEdit = findViewById(R.id.editReminderPhrase)
+        val saveButton       = findViewById<Button>(R.id.buttonSave)
+        val timeButton       = findViewById<Button>(R.id.buttonSetTime)
+        val timeLabel        = findViewById<TextView>(R.id.textReminderTime)
         val creatureRecycler = findViewById<RecyclerView>(R.id.creaturePickerRecycler)
 
         creaturePickerAdapter = CreaturePickerAdapter { selectedId ->
@@ -69,7 +80,6 @@ class EditorNoteActivity : AppCompatActivity() {
 
         val noteId = intent.getIntExtra("NOTE_ID", -1)
 
-        // observe all notes to find which creature IDs are already in use
         homeViewModel.allNotes.observe(this) { notes ->
             val usedIds = notes
                 .filter { it.creatureId != null && it.id != noteId }
@@ -118,32 +128,82 @@ class EditorNoteActivity : AppCompatActivity() {
             viewModel.title = title
             viewModel.body = bodyEdit.text.toString().trim()
             viewModel.reminderPhrase = reminderEdit.text.toString().trim()
-            viewModel.saveNote()
 
-            viewModel.reminderTime?.let { triggerTime ->
-                startService(Intent(this, ReminderService::class.java).apply {
-                    putExtra("NOTE_TITLE", viewModel.title)
-                    putExtra("REMINDER_PHRASE", viewModel.reminderPhrase)
-                    putExtra("TRIGGER_TIME", triggerTime)
-                })
+            lifecycleScope.launch {
+                val noteId = viewModel.saveNote()   // now we have the real ID
+
+                viewModel.reminderTime?.let { triggerTime ->
+                    val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+                    if (!alarmManager.canScheduleExactAlarms()) {
+                        startActivity(
+                            Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                                data = Uri.parse("package:$packageName")
+                            }
+                        )
+                        Toast.makeText(
+                            this@EditorNoteActivity,
+                            "Please allow exact alarms so your reminder fires on time",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    startService(Intent(this@EditorNoteActivity, ReminderService::class.java).apply {
+                        putExtra("NOTE_ID", noteId)   // real ID, never -1
+                        putExtra("NOTE_TITLE", viewModel.title)
+                        putExtra("REMINDER_PHRASE", viewModel.reminderPhrase)
+                        putExtra("TRIGGER_TIME", triggerTime)
+                    })
+                }
+
+                refreshWidget()
+                finish()
             }
+        }
 
-            // refresh widget after save
-            val manager = AppWidgetManager.getInstance(this)
-            val ids = manager.getAppWidgetIds(ComponentName(this, CreatureWidgetProvider::class.java))
-            sendBroadcast(Intent(this, CreatureWidgetProvider::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-            })
-
-            finish()
+        // Back-press confirmation if there are unsaved changes
+        onBackPressedDispatcher.addCallback(this) {
+            if (hasUnsavedChanges()) {
+                AlertDialog.Builder(this@EditorNoteActivity)
+                    .setTitle("Discard changes?")
+                    .setMessage("You have unsaved changes. Leave without saving?")
+                    .setPositiveButton("Discard") { _, _ -> finish() }
+                    .setNegativeButton("Keep editing", null)
+                    .show()
+            } else {
+                finish()
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        viewModel.title = findViewById<EditText>(R.id.editTitle).text.toString()
-        viewModel.body = findViewById<EditText>(R.id.editBody).text.toString()
-        viewModel.reminderPhrase = findViewById<EditText>(R.id.editReminderPhrase).text.toString()
+        viewModel.title = titleEdit.text.toString()
+        viewModel.body = bodyEdit.text.toString()
+        viewModel.reminderPhrase = reminderEdit.text.toString()
+    }
+
+    private fun hasUnsavedChanges(): Boolean {
+        val note = viewModel.currentNote.value
+        val currentTitle = titleEdit.text.toString().trim()
+        val currentBody = bodyEdit.text.toString().trim()
+        val currentPhrase = reminderEdit.text.toString().trim()
+
+        return if (note == null) {
+            // New note — flag as changed if anything has been typed
+            currentTitle.isNotEmpty() || currentBody.isNotEmpty() || currentPhrase.isNotEmpty()
+        } else {
+            // Existing note — compare against what was loaded
+            currentTitle != (note.title ?: "") ||
+                    currentBody  != (note.body ?: "") ||
+                    currentPhrase != (note.reminderPhrase ?: "")
+        }
+    }
+
+    private fun refreshWidget() {
+        val manager = AppWidgetManager.getInstance(this)
+        val ids = manager.getAppWidgetIds(ComponentName(this, CreatureWidgetProvider::class.java))
+        sendBroadcast(Intent(this, CreatureWidgetProvider::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        })
     }
 }

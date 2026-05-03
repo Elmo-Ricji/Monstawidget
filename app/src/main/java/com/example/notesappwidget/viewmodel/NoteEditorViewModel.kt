@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.notesappwidget.data.Note
 import com.example.notesappwidget.repository.NoteRepository
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 class NoteEditorViewModel(private val repository: NoteRepository) : ViewModel() {
 
@@ -32,25 +34,30 @@ class NoteEditorViewModel(private val repository: NoteRepository) : ViewModel() 
         }
     }
 
-    fun saveNote() = viewModelScope.launch {
+    suspend fun saveNote(): Int {
         val existing = _currentNote.value
-        if (existing != null) {
-            repository.update(existing.copy(
-                title = title, body = body,
+        return if (existing != null) {
+            val updated = existing.copy(
+                title = title,
+                body = body,
                 reminderPhrase = reminderPhrase,
                 creatureId = creatureId,
                 reminderTime = reminderTime,
                 updatedAt = System.currentTimeMillis()
-            ))
+            )
+            repository.update(updated)
+            existing.id
         } else {
-            repository.insert(Note(
-                title = title, body = body,
+            val newNote = Note(
+                title = title,
+                body = body,
                 reminderPhrase = reminderPhrase,
                 creatureId = creatureId,
                 reminderTime = reminderTime,
                 createdAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis()
-            ))
+            )
+            repository.insert(newNote).toInt()
         }
     }
 

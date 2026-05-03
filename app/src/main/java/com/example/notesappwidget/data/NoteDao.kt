@@ -16,4 +16,7 @@ interface NoteDao {
 
     @Query("SELECT * FROM Note WHERE id = :id")
     suspend fun getNoteById(id: Int): com.example.notesappwidget.data.Note?
+
+    @Query("SELECT * FROM Note ORDER BY updatedAt DESC")
+    suspend fun getAllNotesOnce(): List<Note>
 }

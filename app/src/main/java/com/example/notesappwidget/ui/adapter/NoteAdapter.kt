@@ -38,11 +38,17 @@ class NoteAdapter(
         } ?: ""
 
         val creatureRes = when (note.creatureId) {
-            0 -> R.drawable.creature_0
-            1 -> R.drawable.creature_1
-            2 -> R.drawable.creature_2
-            3 -> R.drawable.creature_3
-            else -> R.drawable.creature_0
+            0 -> R.drawable.monsta_head_0
+            1 -> R.drawable.monsta_head_1
+            2 -> R.drawable.monsta_head_2
+            3 -> R.drawable.monsta_head_3
+            4 -> R.drawable.monsta_head_4
+            5 -> R.drawable.monsta_head_5
+            6 -> R.drawable.monsta_head_6
+            7 -> R.drawable.monsta_head_7
+            8 -> R.drawable.monsta_head_8
+            9 -> R.drawable.monsta_head_9
+            else -> R.drawable.monsta_head_0
         }
         holder.creatureImage.setImageResource(creatureRes)
 

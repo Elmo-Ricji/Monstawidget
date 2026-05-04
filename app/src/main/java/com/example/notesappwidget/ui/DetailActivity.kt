@@ -74,7 +74,7 @@ class DetailActivity : AppCompatActivity() {
                     })
                 }
 
-                // Done button — deletes note, frees Monsta, refreshes widget
+
                 doneButton.setOnClickListener { _ ->
                     AlertDialog.Builder(this)
                         .setTitle("Mark as done?")

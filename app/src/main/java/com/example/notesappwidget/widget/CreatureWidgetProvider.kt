@@ -32,7 +32,7 @@ class CreatureWidgetProvider : AppWidgetProvider() {
 
     companion object {
 
-        // slot config: layout IDs for each Monsta slot
+
         data class Slot(
             val slotLayout: Int,
             val imageView: Int,

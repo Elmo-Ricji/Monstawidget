@@ -50,7 +50,7 @@ class ReminderService : IntentService("ReminderService") {
                         pendingIntent
                     )
                 } catch (e: SecurityException) {
-                    // Permission was revoked between the check and the call — fall back
+
                     alarmManager.setAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         triggerTime,
@@ -58,7 +58,7 @@ class ReminderService : IntentService("ReminderService") {
                     )
                 }
             } else {
-                // No exact alarm permission — use inexact, still fires within ~few minutes
+
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     triggerTime,

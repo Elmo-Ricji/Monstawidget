@@ -3,68 +3,101 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="16dp">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="32dp"
+        android:paddingBottom="40dp">
 
-        <TextView
-            android:id="@+id/detailThoughtCloud"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/thought_cloud_bg"
-            android:padding="12dp"
-            android:textSize="14sp"
-            android:layout_marginBottom="4dp"/>
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="24dp">
 
-        <ImageView
-            android:id="@+id/detailCreatureImage"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:contentDescription="creature"
-            android:scaleType="centerInside"
-            android:layout_marginBottom="16dp"/>
+            <TextView
+                android:id="@+id/detailThoughtCloud"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/thought_cloud_bg"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="10dp"
+                android:textSize="13sp"
+                android:maxWidth="260dp"
+                android:gravity="center"
+                android:layout_marginBottom="4dp"/>
+
+            <ImageView
+                android:id="@+id/detailCreatureImage"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:contentDescription="creature"
+                android:scaleType="centerInside"/>
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/detailTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            android:lineSpacingMultiplier="1.2"
+            android:layout_marginBottom="12dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutline"
+            android:alpha="0.15"
+            android:layout_marginBottom="12dp"/>
 
         <TextView
             android:id="@+id/detailBody"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:lineSpacingMultiplier="1.4"
-            android:layout_marginBottom="24dp"/>
+            android:textSize="15sp"
+            android:lineSpacingMultiplier="1.6"
+            android:layout_marginBottom="32dp"/>
 
-        <Button
-            android:id="@+id/shareButton"
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Share Note"
-            android:layout_marginBottom="8dp"/>
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
 
-        <Button
-            android:id="@+id/editButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Edit Note"
-            android:layout_marginBottom="8dp"/>
+            <Button
+                android:id="@+id/shareButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="share"/>
+
+            <Button
+                android:id="@+id/editButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="edit"/>
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/doneButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="✅ Done! Free my Monsta"
-            android:backgroundTint="#4CAF50"
+            android:text=" free my monsta"
+            android:backgroundTint="#3DAA6A"
             android:textColor="#FFFFFF"/>
 
     </LinearLayout>

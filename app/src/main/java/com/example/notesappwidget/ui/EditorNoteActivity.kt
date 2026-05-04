@@ -66,7 +66,7 @@ class EditorNoteActivity : AppCompatActivity() {
 
         titleEdit    = findViewById(R.id.editTitle)
         bodyEdit     = findViewById(R.id.editBody)
-        reminderEdit = findViewById(R.id.editReminderPhrase)
+        //reminderEdit = findViewById(R.id.editReminderPhrase)
         val saveButton       = findViewById<Button>(R.id.buttonSave)
         val timeButton       = findViewById<Button>(R.id.buttonSetTime)
         val timeLabel        = findViewById<TextView>(R.id.textReminderTime)
@@ -130,7 +130,7 @@ class EditorNoteActivity : AppCompatActivity() {
             viewModel.reminderPhrase = reminderEdit.text.toString().trim()
 
             lifecycleScope.launch {
-                val noteId = viewModel.saveNote()   // now we have the real ID
+                val noteId = viewModel.saveNote()
 
                 viewModel.reminderTime?.let { triggerTime ->
                     val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager

@@ -17,6 +17,7 @@ import com.example.notesappwidget.repository.NoteRepository
 import com.example.notesappwidget.ui.adapter.NoteAdapter
 import com.example.notesappwidget.viewmodel.HomeViewModel
 import com.example.notesappwidget.viewmodel.HomeViewModelFactory
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -61,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             noteAdapter.submitList(notes)
         }
 
-        findViewById<Button>(R.id.add_button).setOnClickListener {
+        findViewById<FloatingActionButton>(R.id.add_button).setOnClickListener {
             startActivity(Intent(this, EditorNoteActivity::class.java))
         }
     }

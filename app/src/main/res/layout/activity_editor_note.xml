@@ -1,73 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="32dp">
 
         <EditText
             android:id="@+id/editTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Title"
+            android:hint="note title"
             android:inputType="textCapSentences"
-            android:textSize="20sp"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:background="@null"
             android:contentDescription="Note title" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="?attr/colorOutline"
+            android:alpha="0.2"/>
 
         <EditText
             android:id="@+id/editBody"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Write your note..."
+            android:layout_marginTop="16dp"
+            android:hint="what's on your mind..."
             android:inputType="textMultiLine|textCapSentences"
-            android:minLines="4"
+            android:minLines="5"
             android:gravity="top"
+            android:background="@null"
+            android:textSize="15sp"
+            android:lineSpacingMultiplier="1.4"
             android:contentDescription="Note body" />
-
-        <Button
-            android:id="@+id/buttonSetTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Set reminder time"
-            android:contentDescription="Set reminder time" />
-
-        <TextView
-            android:id="@+id/textReminderTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text=""
-            android:contentDescription="Selected reminder time" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Pick your Monsta"
-            android:textStyle="bold" />
+            android:layout_marginTop="24dp"
+            android:text="reminder"
+            android:textSize="11sp"
+            android:textAllCaps="true"
+            android:letterSpacing="0.1"
+            android:alpha="0.5"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/buttonSetTime"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="set time"
+                android:contentDescription="Set reminder time" />
+
+            <TextView
+                android:id="@+id/textReminderTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:textSize="13sp"
+                android:alpha="0.6"
+                android:text=""
+                android:contentDescription="Selected reminder time" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="pick your monsta"
+            android:textSize="11sp"
+            android:textAllCaps="true"
+            android:letterSpacing="0.1"
+            android:alpha="0.5"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/creaturePickerRecycler"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="10dp"
             android:contentDescription="Monsta picker" />
 
         <Button
             android:id="@+id/buttonSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Save note"
+            android:layout_marginTop="32dp"
+            android:text="save"
             android:contentDescription="Save note" />
 
     </LinearLayout>

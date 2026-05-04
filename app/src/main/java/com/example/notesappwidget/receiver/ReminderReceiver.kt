@@ -16,10 +16,10 @@ class ReminderReceiver : BroadcastReceiver() {
         val triggerTime    = intent.getLongExtra("TRIGGER_TIME", -1L)
         if (noteId == -1 || triggerTime == -1L) return
 
-        // Post the notification
+
         NotificationHelper.postReminder(context, noteId, noteTitle, reminderPhrase)
 
-        // Reschedule for the same time tomorrow
+
         val nextTrigger = Calendar.getInstance().apply {
             timeInMillis = triggerTime
             add(Calendar.DAY_OF_YEAR, 1)

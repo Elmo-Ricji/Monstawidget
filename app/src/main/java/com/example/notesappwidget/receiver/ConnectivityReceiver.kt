@@ -11,7 +11,7 @@ class ConnectivityReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val isOnline = isNetworkAvailable(context)
 
-        // Broadcast locally so any active Activity can react
+
         val localIntent = Intent(ACTION_CONNECTIVITY_CHANGE).apply {
             putExtra(IS_ONLINE, isOnline)
         }

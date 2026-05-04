@@ -14,9 +14,10 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="24dp"
         android:text="my monstas"
-        android:textSize="28sp"
+        android:textSize="32sp"
         android:textStyle="bold"
-        android:letterSpacing="0.02"
+        android:fontFamily="serif"
+        android:letterSpacing="-0.02"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

@@ -55,8 +55,7 @@ class DetailActivity : AppCompatActivity() {
             note?.let {
                 titleView.text   = it.title ?: "Untitled"
                 bodyView.text    = it.body ?: ""
-                thoughtCloud.text = it.reminderPhrase ?: ""
-                // static — no jumping in app
+                thoughtCloud.text = it.reminderPhrase?.ifBlank { it.title ?: "" } ?: it.title ?: ""
                 creatureView.setImageResource(getFullDrawable(it.creatureId))
 
                 shareButton.setOnClickListener { _ ->

@@ -11,9 +11,6 @@ import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -21,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesappwidget.R
@@ -34,6 +32,7 @@ import com.example.notesappwidget.viewmodel.HomeViewModelFactory
 import com.example.notesappwidget.viewmodel.NoteEditorViewModel
 import com.example.notesappwidget.viewmodel.NoteEditorViewModelFactory
 import com.example.notesappwidget.widget.CreatureWidgetProvider
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class EditorNoteActivity : AppCompatActivity() {
@@ -44,7 +43,6 @@ class EditorNoteActivity : AppCompatActivity() {
 
     private lateinit var titleEdit: EditText
     private lateinit var bodyEdit: EditText
-    private lateinit var reminderEdit: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,9 +62,8 @@ class EditorNoteActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, NoteEditorViewModelFactory(repository))[NoteEditorViewModel::class.java]
         homeViewModel = ViewModelProvider(this, HomeViewModelFactory(repository))[HomeViewModel::class.java]
 
-        titleEdit    = findViewById(R.id.editTitle)
-        bodyEdit     = findViewById(R.id.editBody)
-        //reminderEdit = findViewById(R.id.editReminderPhrase)
+        titleEdit = findViewById(R.id.editTitle)
+        bodyEdit  = findViewById(R.id.editBody)
         val saveButton       = findViewById<Button>(R.id.buttonSave)
         val timeButton       = findViewById<Button>(R.id.buttonSetTime)
         val timeLabel        = findViewById<TextView>(R.id.textReminderTime)
@@ -94,11 +91,10 @@ class EditorNoteActivity : AppCompatActivity() {
             note?.let {
                 titleEdit.setText(it.title)
                 bodyEdit.setText(it.body)
-                reminderEdit.setText(it.reminderPhrase)
                 creaturePickerAdapter.setSelected(it.creatureId ?: 0)
                 it.reminderTime?.let { t ->
                     val cal = Calendar.getInstance().apply { timeInMillis = t }
-                    timeLabel.text = "Reminder: %02d:%02d".format(
+                    timeLabel.text = "%02d:%02d".format(
                         cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
                 }
             }
@@ -115,22 +111,22 @@ class EditorNoteActivity : AppCompatActivity() {
                         add(Calendar.DAY_OF_YEAR, 1)
                 }
                 viewModel.reminderTime = trigger.timeInMillis
-                timeLabel.text = "Reminder: %02d:%02d".format(hour, minute)
+                timeLabel.text = "%02d:%02d".format(hour, minute)
             }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show()
         }
 
         saveButton.setOnClickListener {
             val title = titleEdit.text.toString().trim()
             if (title.isEmpty()) {
-                Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "Please enter a title", android.widget.Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             viewModel.title = title
             viewModel.body = bodyEdit.text.toString().trim()
-            viewModel.reminderPhrase = reminderEdit.text.toString().trim()
+            viewModel.reminderPhrase = title  // title IS the reminder phrase
 
             lifecycleScope.launch {
-                val noteId = viewModel.saveNote()
+                val savedId = viewModel.saveNote()
 
                 viewModel.reminderTime?.let { triggerTime ->
                     val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
@@ -140,16 +136,16 @@ class EditorNoteActivity : AppCompatActivity() {
                                 data = Uri.parse("package:$packageName")
                             }
                         )
-                        Toast.makeText(
+                        android.widget.Toast.makeText(
                             this@EditorNoteActivity,
                             "Please allow exact alarms so your reminder fires on time",
-                            Toast.LENGTH_LONG
+                            android.widget.Toast.LENGTH_LONG
                         ).show()
                     }
                     startService(Intent(this@EditorNoteActivity, ReminderService::class.java).apply {
-                        putExtra("NOTE_ID", noteId)   // real ID, never -1
-                        putExtra("NOTE_TITLE", viewModel.title)
-                        putExtra("REMINDER_PHRASE", viewModel.reminderPhrase)
+                        putExtra("NOTE_ID", savedId)
+                        putExtra("NOTE_TITLE", title)
+                        putExtra("REMINDER_PHRASE", title)  // title IS the reminder phrase
                         putExtra("TRIGGER_TIME", triggerTime)
                     })
                 }
@@ -159,7 +155,6 @@ class EditorNoteActivity : AppCompatActivity() {
             }
         }
 
-        // Back-press confirmation if there are unsaved changes
         onBackPressedDispatcher.addCallback(this) {
             if (hasUnsavedChanges()) {
                 AlertDialog.Builder(this@EditorNoteActivity)
@@ -178,23 +173,19 @@ class EditorNoteActivity : AppCompatActivity() {
         super.onPause()
         viewModel.title = titleEdit.text.toString()
         viewModel.body = bodyEdit.text.toString()
-        viewModel.reminderPhrase = reminderEdit.text.toString()
+        viewModel.reminderPhrase = titleEdit.text.toString()  // keep in sync
     }
 
     private fun hasUnsavedChanges(): Boolean {
         val note = viewModel.currentNote.value
         val currentTitle = titleEdit.text.toString().trim()
         val currentBody = bodyEdit.text.toString().trim()
-        val currentPhrase = reminderEdit.text.toString().trim()
 
         return if (note == null) {
-            // New note — flag as changed if anything has been typed
-            currentTitle.isNotEmpty() || currentBody.isNotEmpty() || currentPhrase.isNotEmpty()
+            currentTitle.isNotEmpty() || currentBody.isNotEmpty()
         } else {
-            // Existing note — compare against what was loaded
             currentTitle != (note.title ?: "") ||
-                    currentBody  != (note.body ?: "") ||
-                    currentPhrase != (note.reminderPhrase ?: "")
+                    currentBody  != (note.body ?: "")
         }
     }
 

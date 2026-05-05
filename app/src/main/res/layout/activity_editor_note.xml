@@ -24,13 +24,11 @@
             android:textStyle="bold"
             android:background="@null"
             android:contentDescription="Note title" />
-
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="8dp"
-            android:background="?attr/colorOutline"
-            android:alpha="0.2"/>
+            android:background="#20000000"/>
 
         <EditText
             android:id="@+id/editBody"
@@ -46,16 +44,6 @@
             android:lineSpacingMultiplier="1.4"
             android:contentDescription="Note body" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="reminder"
-            android:textSize="11sp"
-            android:textAllCaps="true"
-            android:letterSpacing="0.1"
-            android:alpha="0.5"/>
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -66,7 +54,7 @@
 
             <Button
                 android:id="@+id/buttonSetTime"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="set time"

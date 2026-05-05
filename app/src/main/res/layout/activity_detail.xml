@@ -54,7 +54,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="?attr/colorOutline"
+            android:background="#20000000"
             android:alpha="0.15"
             android:layout_marginBottom="12dp"/>
 
@@ -67,38 +67,31 @@
             android:layout_marginBottom="32dp"/>
 
 
-        <LinearLayout
+        <Button
+            android:id="@+id/shareButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#4A90D9"
+            android:text="share"
+            android:textColor="#FFFFFF" />
 
-            <Button
-                android:id="@+id/shareButton"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:text="share"/>
-
-            <Button
-                android:id="@+id/editButton"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="edit"/>
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/editButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#6B4F3A"
+            android:text="edit"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/doneButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=" free my monsta"
+            android:text="free my monsta"
             android:backgroundTint="#3DAA6A"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 </ScrollView>
